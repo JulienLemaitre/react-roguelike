@@ -129,7 +129,7 @@ class App extends Component {
     this.state = {
       width: 800,
       height: 600,
-      scale: 15,
+      scale: 20,
       grid: [],
       stage: 0,
       actors: [],

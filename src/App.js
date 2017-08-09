@@ -3,7 +3,6 @@ import './App.css';
 import Infos from './components/infos';
 import Board from './components/board';
 
-
 const simpleLevelPlan = [
   "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
   "x      xxxxxxx          xxxxxxxxxxxxxxxxxx        xxxxxxxxxx",
@@ -141,14 +140,103 @@ class App extends Component {
     this.buildLevel = this.buildLevel.bind(this);
     this.randomActors = this.randomActors.bind(this);
     this.findEmptyCell = this.findEmptyCell.bind(this);
-    // this.scrollPlayerIntoView = this.scrollPlayerIntoView.bind(this);
+    this.onKeyDown = this.onKeyDown.bind(this);
   }
 
   componentDidMount() {
     let theGrid = this.buildLevel(simpleLevelPlan);
     let theActors = this.randomActors(this.state.stage, theGrid);
-    // let scrollMove = this.scrollPlayerIntoView() || { scrollLeft: null, scrollTop: null };
+    document.addEventListener("keydown", this.onKeyDown);
     this.setState({ grid: theGrid, actors: theActors });
+  }
+
+  onKeyDown(event) {
+    if (event.keyCode === 38)
+      this.goUp();
+    if (event.keyCode === 40)
+      this.goDown();
+    if (event.keyCode === 37)
+      this.goLeft();
+    if (event.keyCode === 39)
+      this.goRight();
+  }
+
+  goUp() {
+    console.log("go Up!");
+    const playerIndex = this.state.actors.findIndex(actor => actor.type === "player");
+    const player = this.state.actors[playerIndex];
+    const target = this.isEmpty(player.pos.plus(new Vector(0,-1)));
+    if (target === true) {
+      const newY = player.pos.y - 1;
+      const newPlayer = player;
+      newPlayer.pos.y = newY;
+      const newActors = this.state.actors;
+      newActors.splice(playerIndex, 1, newPlayer);
+      this.setState({ actors: newActors});
+    }
+  }
+
+  goDown() {
+    console.log("go Down!");
+    const playerIndex = this.state.actors.findIndex(actor => actor.type === "player");
+    const player = this.state.actors[playerIndex];
+    const target = this.isEmpty(player.pos.plus(new Vector(0,1)));
+    if (target === true) {
+      const newY = player.pos.y + 1;
+      const newPlayer = player;
+      newPlayer.pos.y = newY;
+      const newActors = this.state.actors;
+      newActors.splice(playerIndex, 1, newPlayer);
+      this.setState({ actors: newActors});
+    }
+  }
+
+  goRight() {
+    console.log("go Right!");
+    const playerIndex = this.state.actors.findIndex(actor => actor.type === "player");
+    const player = this.state.actors[playerIndex];
+    const target = this.isEmpty(player.pos.plus(new Vector(1,0)));
+    if (target === true) {
+      const newX = player.pos.x + 1;
+      const newPlayer = player;
+      newPlayer.pos.x = newX;
+      const newActors = this.state.actors;
+      newActors.splice(playerIndex, 1, newPlayer);
+      this.setState({ actors: newActors});
+    }
+  }
+
+  goLeft() {
+    console.log("go Left!");
+    const playerIndex = this.state.actors.findIndex(actor => actor.type === "player");
+    const player = this.state.actors[playerIndex];
+    const target = this.isEmpty(player.pos.plus(new Vector(-1,0)));
+    if (target === true) {
+      const newX = player.pos.x - 1;
+      const newPlayer = player;
+      newPlayer.pos.x = newX;
+      const newActors = this.state.actors;
+      newActors.splice(playerIndex, 1, newPlayer);
+      this.setState({ actors: newActors});
+    }
+  }
+
+
+  isEmpty(vector) {
+    if (!this.isSpace(vector)) {
+      return false;
+    } else {
+      return this.isUnoccupied(vector);
+    }
+  }
+
+  isSpace(vector) {
+    return this.state.grid[vector.y][vector.x] !== "wall";
+  }
+
+  isUnoccupied(vector) {
+    const occupied = this.state.actors.filter( actor => actor.pos.x === vector.x && actor.pos.y === vector.y );
+    return occupied.length > 0 ? occupied : true;
   }
 
   buildLevel(plan) {
@@ -190,7 +278,6 @@ class App extends Component {
   }
 
   findEmptyCell(grid, actors) {
-    // console.log("grid",grid,"actors",actors);
     const width = grid[0].length;
     const height = grid.length;
     const findXY = () => {
@@ -211,38 +298,6 @@ class App extends Component {
     };
     return findXY();
   }
-
-  // scrollPlayerIntoView() {
-  //   // The viewport
-  //   const theBoard = document.querySelector(".game")[0];
-  //   let scrollLeft = null, scrollTop = null;
-  //
-  //   if (theBoard) {
-  //     const width = this.state.width;
-  //     const height = this.state.height;
-  //     const margin = width / 3;
-  //
-  //     const left = theBoard.scrollLeft, right = left + width;
-  //     const top = theBoard.scrollTop, bottom = top + height;
-  //
-  //     const player = this.state.actors.find(actor => actor.type === "player");
-  //     const center = player.pos.plus(player.size.times(0.5)).times(this.state.scale);
-  //     console.log("player:",player,"left:",left, "top:", top, "center:", center);
-  //
-  //
-  //     if (center.x < left + margin)
-  //       scrollLeft = center.x - margin;
-  //     else if (center.x > right - margin)
-  //       scrollLeft = center.x + margin - width;
-  //     if (center.y < top + margin)
-  //       scrollTop = center.y - margin;
-  //     else if (center.y > bottom - margin)
-  //       scrollTop = center.y + margin - height;
-  //   }
-  //
-  //   return { scrollLeft, scrollTop };
-  // }
-
 
   render() {
     return (

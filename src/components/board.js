@@ -9,13 +9,11 @@ class Board extends Component {
   }
 
   scrollPlayerIntoView () {
-    console.log("props",this.props);
     // The viewport
     const theBoard = document.querySelector(".game");
     let scrollLeft = 0, scrollTop = 0;
 
     if (theBoard) {
-      console.log("theBoard", theBoard);
       const width = this.props.width;
       const height = this.props.height;
       const margin = width / 3;

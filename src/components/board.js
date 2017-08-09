@@ -9,7 +9,6 @@ class Board extends Component {
   }
 
   scrollPlayerIntoView () {
-    // The viewport
     const theBoard = document.querySelector(".game");
     let scrollLeft = null, scrollTop = null;
 
@@ -23,7 +22,6 @@ class Board extends Component {
 
       const player = this.props.actors.find(actor => actor.type === "player");
       const center = player.pos.plus(player.size.times(0.5)).times(this.props.scale);
-      console.log("player.pos:",player.pos,"left:",left, "top:", top, "player center.x:", center.x, "margin:", margin, "center.x < left + margin:",center.x < left + margin);
 
       if (center.x < left + margin)
         scrollLeft = center.x - margin;
@@ -41,7 +39,6 @@ class Board extends Component {
 
   componentDidUpdate(props) {
     const scrollMove = this.scrollPlayerIntoView(props);
-    console.log("scrollMove:",scrollMove,Math.floor(scrollMove.scrollLeft),Math.floor(scrollMove.scrollTop));
     if (this.divGame) {
       if (scrollMove.scrollLeft)
         this.divGame.scrollLeft = Math.floor(scrollMove.scrollLeft);

@@ -33,8 +33,23 @@ const simpleLevelPlan = [
   "x                 xxxxxxxxxx      xxxxxxxxx xxxxxxxxxxxxxxxx",
   "x                 xxxxxxxxxxxxxxxxxxxxxxxx         xxxxxxxxx",
   "x                 xxxxxxxxxxxxxxxxxxxxxxxx         xxxxxxxxx",
-  "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-];
+  "xxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxx",
+  "x      xxxxxxx          xxxxxxxxxxxxxxxxxx        xxxxxxxxxx",
+  "x      xxxxxxx          xxxxxxxxxxxxxxxxxx        xxxxxxxxxx",
+  "x      xxxxxxx xxxxxxxx xxxxxxxxxxxxxxxxxx        xxxxxxxxxx",
+  "x              xxxx                     xx        xxx      x",
+  "xxxxxxx        xxxx                     xx        xxx      x",
+  "xxxxxxx        xxxx                     xx        xxx      x",
+  "xxxxxxx        xxxx                               xxx      x",
+  "xxxxxxx        xxxx                     xx        xxx      x",
+  "xxxxxxx        xxxx                     xx        xxxxxxxx x",
+  "xxxxxxxxxxxxxxxxxxx                     xx                 x",
+  "xx                                      xxxxxxx xxx        x",
+  "xx                x                     xxxx      x        x",
+  "xx                xxxxxxxx xxxxxxxxxxxxxxxxx      x        x",
+  "xx                xxxx          xxxxxxxxxxxx      x        x",
+  "xx                xxxx          xxxxxxxxxxxx               x",
+  "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",];
 
 const dungeons = {
   0: {
@@ -152,75 +167,29 @@ class App extends Component {
 
   onKeyDown(event) {
     if (event.keyCode === 38)
-      this.goUp();
+      this.aimAt(new Vector(0,-1));
     if (event.keyCode === 40)
-      this.goDown();
+      this.aimAt(new Vector(0,1));
     if (event.keyCode === 37)
-      this.goLeft();
+      this.aimAt(new Vector(-1,0));
     if (event.keyCode === 39)
-      this.goRight();
+      this.aimAt(new Vector(1,0));
   }
 
-  goUp() {
-    console.log("go Up!");
+  aimAt(vector) {
     const playerIndex = this.state.actors.findIndex(actor => actor.type === "player");
     const player = this.state.actors[playerIndex];
-    const target = this.isEmpty(player.pos.plus(new Vector(0,-1)));
+    const target = this.isEmpty(player.pos.plus(vector));
+    console.log("target:",target);
     if (target === true) {
-      const newY = player.pos.y - 1;
+      const newPos = player.pos.plus(vector);
       const newPlayer = player;
-      newPlayer.pos.y = newY;
+      newPlayer.pos = newPos;
       const newActors = this.state.actors;
       newActors.splice(playerIndex, 1, newPlayer);
       this.setState({ actors: newActors});
     }
   }
-
-  goDown() {
-    console.log("go Down!");
-    const playerIndex = this.state.actors.findIndex(actor => actor.type === "player");
-    const player = this.state.actors[playerIndex];
-    const target = this.isEmpty(player.pos.plus(new Vector(0,1)));
-    if (target === true) {
-      const newY = player.pos.y + 1;
-      const newPlayer = player;
-      newPlayer.pos.y = newY;
-      const newActors = this.state.actors;
-      newActors.splice(playerIndex, 1, newPlayer);
-      this.setState({ actors: newActors});
-    }
-  }
-
-  goRight() {
-    console.log("go Right!");
-    const playerIndex = this.state.actors.findIndex(actor => actor.type === "player");
-    const player = this.state.actors[playerIndex];
-    const target = this.isEmpty(player.pos.plus(new Vector(1,0)));
-    if (target === true) {
-      const newX = player.pos.x + 1;
-      const newPlayer = player;
-      newPlayer.pos.x = newX;
-      const newActors = this.state.actors;
-      newActors.splice(playerIndex, 1, newPlayer);
-      this.setState({ actors: newActors});
-    }
-  }
-
-  goLeft() {
-    console.log("go Left!");
-    const playerIndex = this.state.actors.findIndex(actor => actor.type === "player");
-    const player = this.state.actors[playerIndex];
-    const target = this.isEmpty(player.pos.plus(new Vector(-1,0)));
-    if (target === true) {
-      const newX = player.pos.x - 1;
-      const newPlayer = player;
-      newPlayer.pos.x = newX;
-      const newActors = this.state.actors;
-      newActors.splice(playerIndex, 1, newPlayer);
-      this.setState({ actors: newActors});
-    }
-  }
-
 
   isEmpty(vector) {
     if (!this.isSpace(vector)) {
@@ -230,13 +199,13 @@ class App extends Component {
     }
   }
 
-  isSpace(vector) {
-    return this.state.grid[vector.y][vector.x] !== "wall";
+  isSpace(vector, grid = this.state.grid) {
+    return grid[vector.y][vector.x] !== "wall";
   }
 
   isUnoccupied(vector) {
     const occupied = this.state.actors.filter( actor => actor.pos.x === vector.x && actor.pos.y === vector.y );
-    return occupied.length > 0 ? occupied : true;
+    return occupied.length > 0 ? occupied[0] : true;
   }
 
   buildLevel(plan) {
@@ -283,17 +252,10 @@ class App extends Component {
     const findXY = () => {
       let testX = Math.floor(Math.random() * width);
       let testY = Math.floor(Math.random() * height);
-      if (grid[testY][testX] === "wall") {
-        return findXY();
+      if (this.isSpace(new Vector(testX,testY), grid) && this.isUnoccupied(new Vector(testX,testY), actors)) {
+        return new Vector(testX, testY);
       } else {
-        const occupied = actors.filter( actor => {
-          return (actor.pos.x === testX && actor.pos.y === testY);
-        });
-        if (occupied.length > 0) {
-          return findXY();
-        } else {
-          return new Vector(testX, testY);
-        }
+        return findXY();
       }
     };
     return findXY();

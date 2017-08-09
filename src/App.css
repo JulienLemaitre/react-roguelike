@@ -1,24 +1,46 @@
 .App {
-  text-align: center;
-}
-
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 80px;
-}
+  text-align: center; }
 
 .App-header {
   background-color: #222;
   height: 150px;
   padding: 20px;
-  color: white;
-}
+  color: white; }
 
-.App-intro {
-  font-size: large;
-}
+.background {
+  background: white;
+  table-layout: fixed;
+  border-spacing: 0; }
 
-@keyframes App-logo-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
+.background td {
+  padding: 0; }
+
+.game {
+  overflow: hidden;
+  max-width: 800px;
+  max-height: 600px;
+  position: relative; }
+
+.wall {
+  background: grey; }
+
+.actor {
+  position: absolute; }
+
+.enemy, .boss {
+  background: red; }
+
+.healthItem {
+  background: green; }
+
+.weapon {
+  background: orange; }
+
+.player {
+  background: blue; }
+
+.lost .player {
+  background: #a04040; }
+
+.won .player {
+  box-shadow: -4px -7px 8px yellow, 4px -7px 8px yellow; }

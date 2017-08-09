@@ -3,129 +3,73 @@ import './App.css';
 import Infos from './components/infos';
 import Board from './components/board';
 
+
 const simpleLevelPlan = [
-  "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-  "x         xxxxxxxxxxx              xxxxxxxxxxxxxxxxxxxxxxxxxxx           xxxxxxxxxxxxxxx",
-  "x         xxxxxxxxxxx              xxxxxxxxxxxxxxxxxxxxxxxxxxx           xxxxxxxxxxxxxxx",
-  "x         xxxxxxxxxxx xxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxx           xxxxxxxxxxxxxxx",
-  "x                     xxxxxx                              xxxx           xxxx          x",
-  "xxxxxxxxxxx           xxxxxx                              xxxx           xxxx          x",
-  "xxxxxxxxxxx           xxxxxx                              xxxx           xxxx          x",
-  "xxxxxxxxxxx           xxxxxx                                             xxxx          x",
-  "xxxxxxxxxxx           xxxxxx                              xxxx           xxxx          x",
-  "xxxxxxxxxxx           xxxxxx                              xxxx           xxxxxxxxxxxxx x",
-  "xxxxxxxxxxxxxxxxxxxxxxxxxxxx                              xxxx                         x",
-  "xxx                        x                              xxxxxxxxxxx xxxx             x",
-  "xxx                        x                              xxxxxx         x             x",
-  "xxx                        xxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxx         x             x",
-  "xxx                        xxxxx              xxxxxxxxxxxxxxxxxx         x             x",
-  "xxx                        xxxxx              xxxxxxxxxxxxxxxxxx                       x",
-  "xxxxxxxxxxxxxxx xxxxxxxxxxxxxxxx                               x         xxxxxxxxxxxx  x",
-  "xxxxxxxxxxxxxx                 xxxx xxxxxxxxxxxxxx             x         xxxxx         x",
-  "xxxxxxxxxxxxxx                         xxxxxxxxxxx                       xxxxx         x",
-  "xxxxxxxxxxxxxx                         xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx         x",
-  "xxxxxxxxxxxxxx                         xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx         x",
-  "xxxxxxxxxxxxxx                         x          xxxxxxxxxxxxxxxxxxxxxxxxxxxx         x",
-  "x            x                         x          xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxx",
-  "x            x                         x          xxxxxxxxxx                         xxx",
-  "x                                                 xxxxxxxxxx                         xxx",
-  "x            xxxxxxxxxxxxxxxxxxxxxxxxxxx          xxxxxxxxxx                         xxx",
-  "x                          xxxxxxxxxxxxx          xxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxx",
-  "x                          xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx              xxxxxxxxxxxxx",
-  "x                          xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx              xxxxxxxxxxxxx",
-  "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "x      xxxxxxx          xxxxxxxxxxxxxxxxxx        xxxxxxxxxx",
+  "x      xxxxxxx          xxxxxxxxxxxxxxxxxx        xxxxxxxxxx",
+  "x      xxxxxxx xxxxxxxx xxxxxxxxxxxxxxxxxx        xxxxxxxxxx",
+  "x              xxxx                     xx        xxx      x",
+  "xxxxxxx        xxxx                     xx        xxx      x",
+  "xxxxxxx        xxxx                     xx        xxx      x",
+  "xxxxxxx        xxxx                               xxx      x",
+  "xxxxxxx        xxxx                     xx        xxx      x",
+  "xxxxxxx        xxxx                     xx        xxxxxxxx x",
+  "xxxxxxxxxxxxxxxxxxx                     xx                 x",
+  "xx                x                     xxxxxxx xxx        x",
+  "xx                x                     xxxx      x        x",
+  "xx                xxxxxxxx xxxxxxxxxxxxxxxxx      x        x",
+  "xx                xxxx          xxxxxxxxxxxx      x        x",
+  "xx                xxxx          xxxxxxxxxxxx               x",
+  "xxxxxxxxxx xxxxxxxxxxx                     x      xxxxxxxx x",
+  "xxxxxxxxx            xxx xxxxxxxxx         x      xxx      x",
+  "xxxxxxxxx                  xxxxxxx                xxx      x",
+  "xxxxxxxxx                  xxxxxxxxxxxxxxxxxxxxxxxxxx      x",
+  "xxxxxxxxx                  xxxxxxxxxxxxxxxxxxxxxxxxxx      x",
+  "xxxxxxxxx                  x      xxxxxxxxxxxxxxxxxxx      x",
+  "x       x                  x      xxxxxxxxxxxxxxxxxxxxx xxxx",
+  "x       x                  x      xxxxxxx                 xx",
+  "x                                 xxxxxxx                 xx",
+  "x       xxxxxxxxxxxxxxxxxxxx      xxxxxxx                 xx",
+  "x                 xxxxxxxxxx      xxxxxxxxx xxxxxxxxxxxxxxxx",
+  "x                 xxxxxxxxxxxxxxxxxxxxxxxx         xxxxxxxxx",
+  "x                 xxxxxxxxxxxxxxxxxxxxxxxx         xxxxxxxxx",
+  "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
 ];
 
 const dungeons = {
   0: {
-    enemy: { build: Enemy, amount: 1 },
+    enemy: { build: Enemy, amount: 4 },
     healthItem: { build: HealthItem, amount: 1 },
-    player: { build: Player, amount: 1}
+    player: { build: Player, amount: 1},
+    weapon: { build: Weapon, amount: 1}
   },
   1: {
-    enemy: { build: Enemy, amount: 2 },
+    enemy: { build: Enemy, amount: 5 },
     healthItem: { build: HealthItem, amount: 2 },
-    player: { build: Player, amount: 1}
+    player: { build: Player, amount: 1},
+    weapon: { build: Weapon, amount: 1}
   },
   2: {
-    enemy: { build: Enemy, amount: 3 },
+    enemy: { build: Enemy, amount: 6 },
     healthItem: { build: HealthItem, amount: 3 },
-    player: { build: Player, amount: 1}
+    player: { build: Player, amount: 1},
+    weapon: { build: Weapon, amount: 1}
   },
   3: {
-    enemy: { build: Enemy, amount: 4 },
+    enemy: { build: Enemy, amount: 7 },
     healthItem: { build: HealthItem, amount: 4 },
-    player: { build: Player, amount: 1}
+    player: { build: Player, amount: 1},
+    weapon: { build: Weapon, amount: 1}
   },
   4: {
-    enemy: { build: Enemy, amount: 5 },
+    enemy: { build: Enemy, amount: 8 },
     healthItem: { build: HealthItem, amount: 5 },
     boss: { build: Boss, amount: 1 },
-    player: { build: Player, amount: 1}
+    player: { build: Player, amount: 1},
+    weapon: { build: Weapon, amount: 1}
   }
 };
-
-// level object constructor
-function Level(plan, level) {
-  this.width = plan[0].length;
-  this.height = plan.length;
-  this.level = level;
-  this.grid = [];
-  this.actors = [];
-
-  for (let y=0 ; y < this.height ; y++) {
-    let line = plan[y], gridLine = [];
-    for (let x=0 ; x < this.width ; x++) {
-      const ch = line.charAt(x);
-      let fieldType = null;
-      if (ch === "x")
-        fieldType = "wall";
-      gridLine.push(fieldType);
-    }
-    this.grid.push(gridLine);
-  }
-
-  this.status = this.finishDelay = null;
-}
-
-Level.prototype.isFinished = function() {
-  return this.status != null && this.finishDelay < 0;
-};
-
-function randomActors(level, grid) {
-  let newActors = [];
-  for (let prop in dungeons[level]) {
-    if (dungeons[level].hasOwnProperty(prop)) {
-      for (let p = 0 ; p < dungeons[level][prop].amount ; p++) {
-        const Actor = dungeons[level][prop].build;
-        newActors.push(new Actor(findEmptyCell(grid, newActors), level));
-      }
-    }
-  }
-  return newActors;
-}
-
-function findEmptyCell(grid, actors) {
-  const width = grid[0].length;
-  const height = grid.length;
-  const findXY = () => {
-    let testX = Math.floor(Math.random() * width);
-    let testY = Math.floor(Math.random() * height);
-    if (grid[testY][testX] === "x") {
-      return findXY();
-    } else {
-      const occupied = actors.filter( actor => {
-        return (actor.x === testX && actor.y === testY);
-      });
-      if (occupied.length > 0) {
-        return findXY();
-      } else {
-        return new Vector(testX, testY);
-      }
-    }
-  };
-  return findXY();
-}
 
 function Vector(x, y) {
   this.x = x;
@@ -149,11 +93,11 @@ function Player(pos) {
 }
 Player.prototype.type = "player";
 
-function Enemy(pos, level) {
+function Enemy(pos, stage) {
   this.pos = pos;
   this.size = new Vector(1, 1);
   this.health = 30;
-  this.power = 5 + level;
+  this.power = 5 + stage;
 }
 Enemy.prototype.type = "enemy";
 
@@ -167,24 +111,138 @@ Boss.prototype.type = "boss";
 
 function HealthItem(pos) {
   this.pos = pos;
+  this.size = new Vector(1, 1);
   this.health = 20;
 }
 HealthItem.prototype.type = "healthItem";
+
+function Weapon(pos) {
+  this.pos = pos;
+  this.size = new Vector(1, 1);
+  this.power = 10;
+}
+Weapon.prototype.type = "weapon";
 
 class App extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      level: {}
+      width: 800,
+      height: 600,
+      scale: 15,
+      grid: [],
+      stage: 0,
+      actors: [],
+      gameStatus: null,
+      finishDelay: null,
     };
+
+    this.buildLevel = this.buildLevel.bind(this);
+    this.randomActors = this.randomActors.bind(this);
+    this.findEmptyCell = this.findEmptyCell.bind(this);
+    // this.scrollPlayerIntoView = this.scrollPlayerIntoView.bind(this);
   }
 
   componentDidMount() {
-    let simpleLevel = new Level(simpleLevelPlan,0);
-    simpleLevel.actors = randomActors(simpleLevel.level,simpleLevel.grid);
-    console.log(simpleLevel.width, "by", simpleLevel.height, simpleLevel.actors);
+    let theGrid = this.buildLevel(simpleLevelPlan);
+    let theActors = this.randomActors(this.state.stage, theGrid);
+    // let scrollMove = this.scrollPlayerIntoView() || { scrollLeft: null, scrollTop: null };
+    this.setState({ grid: theGrid, actors: theActors });
   }
+
+  buildLevel(plan) {
+    const width = plan[0].length;
+    const height = plan.length;
+    let grid = [];
+
+    for (let y=0 ; y < height ; y++) {
+      let line = plan[y], gridLine = [];
+      for (let x=0 ; x < width ; x++) {
+        const ch = line.charAt(x);
+        let fieldType = null;
+        if (ch === "x")
+          fieldType = "wall";
+        gridLine.push(fieldType);
+      }
+      grid.push(gridLine);
+    }
+
+    return grid;
+
+  }
+
+  // Level.prototype.isFinished = function() {
+  //   return this.status != null && this.finishDelay < 0;
+  // };
+
+  randomActors(stage, grid) {
+    let newActors = [];
+    for (let prop in dungeons[stage]) {
+      if (dungeons[stage].hasOwnProperty(prop)) {
+        for (let p = 0 ; p < dungeons[stage][prop].amount ; p++) {
+          const Actor = dungeons[stage][prop].build;
+          newActors.push(new Actor(this.findEmptyCell(grid, newActors), stage));
+        }
+      }
+    }
+    return newActors;
+  }
+
+  findEmptyCell(grid, actors) {
+    // console.log("grid",grid,"actors",actors);
+    const width = grid[0].length;
+    const height = grid.length;
+    const findXY = () => {
+      let testX = Math.floor(Math.random() * width);
+      let testY = Math.floor(Math.random() * height);
+      if (grid[testY][testX] === "wall") {
+        return findXY();
+      } else {
+        const occupied = actors.filter( actor => {
+          return (actor.pos.x === testX && actor.pos.y === testY);
+        });
+        if (occupied.length > 0) {
+          return findXY();
+        } else {
+          return new Vector(testX, testY);
+        }
+      }
+    };
+    return findXY();
+  }
+
+  // scrollPlayerIntoView() {
+  //   // The viewport
+  //   const theBoard = document.querySelector(".game")[0];
+  //   let scrollLeft = null, scrollTop = null;
+  //
+  //   if (theBoard) {
+  //     const width = this.state.width;
+  //     const height = this.state.height;
+  //     const margin = width / 3;
+  //
+  //     const left = theBoard.scrollLeft, right = left + width;
+  //     const top = theBoard.scrollTop, bottom = top + height;
+  //
+  //     const player = this.state.actors.find(actor => actor.type === "player");
+  //     const center = player.pos.plus(player.size.times(0.5)).times(this.state.scale);
+  //     console.log("player:",player,"left:",left, "top:", top, "center:", center);
+  //
+  //
+  //     if (center.x < left + margin)
+  //       scrollLeft = center.x - margin;
+  //     else if (center.x > right - margin)
+  //       scrollLeft = center.x + margin - width;
+  //     if (center.y < top + margin)
+  //       scrollTop = center.y - margin;
+  //     else if (center.y > bottom - margin)
+  //       scrollTop = center.y + margin - height;
+  //   }
+  //
+  //   return { scrollLeft, scrollTop };
+  // }
+
 
   render() {
     return (
@@ -194,7 +252,16 @@ class App extends Component {
         </div>
         <div className="App-body">
           <Infos />
-          <Board />
+          <Board
+            grid={this.state.grid}
+            actors={this.state.actors}
+            scale={this.state.scale}
+            gameStatus={this.state.gameStatus}
+            width={this.state.width}
+            height={this.state.height}
+            scrollLeft={this.state.scrollLeft}
+            scrollTop={this.state.scrollTop}
+          />
         </div>
       </div>
     );

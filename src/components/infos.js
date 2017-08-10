@@ -3,7 +3,7 @@ import React from 'react';
 const Infos = (props) => {
   if (props.player) {
     const {health, xp, level, weapon} = props.player;
-
+    const nextLevel = props.levels && props.levels.length > 0 ? props.levels[props.player.level] - xp : 0 ;
     const lightOnOff = props.displayCover ? "on" : "off";
 
     return (
@@ -18,7 +18,7 @@ const Infos = (props) => {
           <label>XP</label>{xp}
         </div>
         <div className="level">
-          <label>Level</label>{level}
+          <label>Level</label>{level} (next in {nextLevel} XP)
         </div>
         <div className="power">
           <label>Weapon</label>{weapon}

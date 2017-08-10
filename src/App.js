@@ -54,43 +54,42 @@ const LevelPlan = [
 const dungeons = {
   0: {
     enemy: { build: Enemy, amount: 4 },
-    healthItem: { build: HealthItem, amount: 1 },
+    healthItem: { build: HealthItem, amount: 2 },
     player: { build: Player, amount: 1},
     weapon: { build: Weapon, amount: 1},
     end: { build: End, amount: 1}
   },
   1: {
     enemy: { build: Enemy, amount: 5 },
-    healthItem: { build: HealthItem, amount: 2 },
+    healthItem: { build: HealthItem, amount: 3 },
     player: { build: Player, amount: 1},
     weapon: { build: Weapon, amount: 1},
     end: { build: End, amount: 1}
   },
   2: {
     enemy: { build: Enemy, amount: 6 },
-    healthItem: { build: HealthItem, amount: 3 },
+    healthItem: { build: HealthItem, amount: 4 },
     player: { build: Player, amount: 1},
     weapon: { build: Weapon, amount: 1},
     end: { build: End, amount: 1}
   },
   3: {
     enemy: { build: Enemy, amount: 7 },
-    healthItem: { build: HealthItem, amount: 4 },
+    healthItem: { build: HealthItem, amount: 5 },
     player: { build: Player, amount: 1},
     weapon: { build: Weapon, amount: 1},
     end: { build: End, amount: 1}
   },
   4: {
     enemy: { build: Enemy, amount: 8 },
-    healthItem: { build: HealthItem, amount: 5 },
+    healthItem: { build: HealthItem, amount: 6 },
     boss: { build: Boss, amount: 1 },
     player: { build: Player, amount: 1},
     weapon: { build: Weapon, amount: 1},
-    end: { build: End, amount: 1}
   }
 };
 
-const levels = [30,50,70,90,110];
+const levels = [30,130,300,550,900,1500,2500];
 
 function Vector(x, y) {
   this.x = x;
@@ -124,7 +123,7 @@ Enemy.prototype.type = "enemy";
 function Boss(pos) {
   this.pos = pos;
   this.size = new Vector(2, 2);
-  this.health = 100;
+  this.health = 150;
   this.power = 40;
 }
 Boss.prototype.type = "boss";
@@ -272,6 +271,11 @@ class App extends Component {
     newPlayer = Object.assign(newPlayer, player);
     newPlayer.pos = new Vector(newX, newY);
     theActors.splice(newPlayerIndex, 1, newPlayer);
+    theActors = theActors.map( actor => {
+      if (actor.type === "enemy")
+        actor.health = actor.health + (this.state.stage + 1) * 10;
+      return actor;
+    });
     this.setState({ stage: this.state.stage + 1, actors: theActors });
   }
 
@@ -279,11 +283,11 @@ class App extends Component {
     const enemyPower = Math.round(actor.power * ( 0.7 + Math.random() * 0.6));
     let enemyHealth = actor.health;
     // We punch the enemy
-    const playerPower = Math.round(player.weapon * ( 0.7 + Math.random() * 0.6));
+    const playerPower = Math.round((player.weapon + player.level * 3) * ( 0.7 + Math.random() * 0.6));
     enemyHealth -= playerPower;
     if (enemyHealth <= 0) { // If enemy die
       // player gain XP
-      const newXP = player.xp + 10 * (player.level + 1);
+      const newXP = player.xp + 10 * (this.state.stage + 1);
       if (newXP < levels[player.level]) {
         newPlayer.xp = newXP;
       } else {
@@ -342,9 +346,9 @@ class App extends Component {
 
   }
 
-  // Level.prototype.isFinished = function() {
-  //   return this.status != null && this.finishDelay < 0;
-  // };
+// TODO make the Boss occupy 4 square of AVAILABLE SPACE
+// TODO handle colision with any of the square occupied by the boss
+// TODO Name the Weapons
 
   randomActors(stage, grid) {
     let newActors = [];
@@ -429,6 +433,7 @@ class App extends Component {
             gameStatus={this.state.gameStatus}
             switchCover={this.switchCover}
             displayCover={this.state.displayCover}
+            levels={levels}
           />
         </div>
         <div className="App-body">

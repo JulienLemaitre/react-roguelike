@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import Background from './background';
 
 class Board extends Component {
 
@@ -48,19 +49,6 @@ class Board extends Component {
   }
 
   render() {
-    const tableWidth = this.props.grid.length > 0 ? this.props.grid[0].length : 0;
-
-    const drawBackground = this.props.grid.map( (row, index) => {
-      return (
-        <tr key={`row-${index}`} style={{ height: this.props.scale }}>
-          {row.map( (cell, index) => {
-            return (
-              <td key={`cell-${index}`} className={cell}></td>
-            );
-          })}
-        </tr>
-      );
-    });
 
     const drawActors = this.props.actors.map( (actor, index) => {
       const width = actor.size.x * this.props.scale + "px";
@@ -87,14 +75,10 @@ class Board extends Component {
          }}
         ref={ (div) => { this.divGame = div } }
       >
-        <table
-          className="background"
-          style={{ width : tableWidth * this.props.scale}}
-        >
-          <tbody>
-            {drawBackground}
-          </tbody>
-        </table>
+        <Background
+          scale={this.props.scale}
+          grid={this.props.grid}
+        />
 
         {drawActors}
       </div>

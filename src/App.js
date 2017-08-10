@@ -3,7 +3,7 @@ import './App.css';
 import Infos from './components/infos';
 import Board from './components/board';
 
-const simpleLevelPlan = [
+const LevelPlan = [
   "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
   "x      xxxxxxx          xxxxxxxxxxxxxxxxxx        xxxxxxxxxx",
   "x      xxxxxxx          xxxxxxxxxxxxxxxxxx        xxxxxxxxxx",
@@ -174,7 +174,7 @@ class App extends Component {
   }
 
   componentDidMount() {
-    let theGrid = this.buildLevel(simpleLevelPlan);
+    let theGrid = this.buildLevel(LevelPlan);
     let theActors = this.randomActors(this.state.stage, theGrid);
     document.addEventListener("keydown", this.onKeyDown);
     this.setState({ grid: theGrid, actors: theActors });

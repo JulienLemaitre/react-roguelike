@@ -161,6 +161,7 @@ class App extends Component {
       actors: [],
       gameStatus: null,
       finishDelay: null,
+      displayCover: true
     };
 
     this.buildLevel = this.buildLevel.bind(this);
@@ -390,6 +391,7 @@ class App extends Component {
             height={this.state.height}
             scrollLeft={this.state.scrollLeft}
             scrollTop={this.state.scrollTop}
+            displayCover={this.state.displayCover}
           />
         </div>
       </div>

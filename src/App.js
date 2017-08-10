@@ -172,6 +172,7 @@ class App extends Component {
     this.gameOver = this.gameOver.bind(this);
     this.endStage = this.endStage.bind(this);
     this.stageIsOver = this.stageIsOver.bind(this);
+    this.switchCover = this.switchCover.bind(this);
   }
 
   componentDidMount() {
@@ -370,6 +371,10 @@ class App extends Component {
     return findXY();
   }
 
+  switchCover() {
+    this.setState({ displayCover: !this.state.displayCover });
+  }
+
   render() {
     return (
       <div className="App">
@@ -379,6 +384,8 @@ class App extends Component {
             stage={this.state.stage}
             player={this.state.actors.find( actor => actor.type === "player")}
             gameStatus={this.state.gameStatus}
+            switchCover={this.switchCover}
+            displayCover={this.state.displayCover}
           />
         </div>
         <div className="App-body">

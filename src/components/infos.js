@@ -4,6 +4,8 @@ const Infos = (props) => {
   if (props.player) {
     const {health, xp, level, weapon} = props.player;
 
+    const lightOnOff = props.displayCover ? "on" : "off";
+
     return (
       <div className="infos">
         <div className="stage">
@@ -20,6 +22,9 @@ const Infos = (props) => {
         </div>
         <div className="power">
           <label>Weapon</label>{weapon}
+        </div>
+        <div className="switch-cover">
+          <button onClick={props.switchCover}>Light {lightOnOff}</button>
         </div>
       </div>
     );

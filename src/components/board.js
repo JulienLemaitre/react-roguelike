@@ -7,6 +7,8 @@ class Board extends Component {
     super(props);
 
     this.state={};
+
+    this.scrollPlayerIntoView = this.scrollPlayerIntoView.bind(this);
   }
 
   scrollPlayerIntoView () {
@@ -26,12 +28,18 @@ class Board extends Component {
 
       if (center.x < left + margin)
         scrollLeft = center.x - margin;
-      else if (center.x > right - margin)
-        scrollLeft = center.x + margin - width;
+      else if (center.x > right - margin) {
+        scrollLeft = center.x + margin - width > this.props.grid[0].length * this.props.scale - width ?
+          this.props.grid[0].length * this.props.scale - width :
+          center.x + margin - width;
+      }
       if (center.y < top + margin)
         scrollTop = center.y - margin;
-      else if (center.y > bottom - margin)
-        scrollTop = center.y + margin - height;
+      else if (center.y > bottom - margin) {
+        scrollTop = center.y + margin - height > this.props.grid.length * this.props.scale - height ?
+          this.props.grid.length * this.props.scale - height :
+          center.y + margin - height;
+      }
 
     }
 
@@ -39,7 +47,7 @@ class Board extends Component {
   }
 
   componentDidUpdate(props) {
-    const scrollMove = this.scrollPlayerIntoView(props);
+    const scrollMove = this.scrollPlayerIntoView();
     if (this.divGame) {
       if (scrollMove.scrollLeft)
         this.divGame.scrollLeft = Math.floor(scrollMove.scrollLeft);
@@ -69,14 +77,12 @@ class Board extends Component {
       const player = this.props.actors.find(actor => actor.type === "player");
       if (this.props.displayCover && player) {
         const radius = 8 * this.props.scale;
-        const backgroundImage = `radial-gradient(circle ${radius}px at center, rgba(0,0,0,0) 0%, rgba(0,0,0,0.2) 40%,rgba(0,0,0,256) 100%)`;
-        console.log(backgroundImage);
-        // const backgroundImage = "radial-gradient(16px at 60px 50px , #000000 0%, #000000 14px, rgba(0, 0, 0, 0.3) 18px, rgba(0, 0, 0, 0) 29px)";
+        const backgroundImage = `radial-gradient(circle ${radius}px at center, rgba(0,0,0,0) 0%, rgba(0,0,0,0.1) 30%, rgba(0,0,0,0.2) 40%,rgba(0,0,0,256) 100%)`;
         const width = (this.props.width * 2) + "px";
         const height = (this.props.height * 2) + "px";
-        const left = ((player.pos.x + 0.5) * this.props.scale - (this.props.width)) + "px";
-        const top = ((player.pos.y + 0.5) * this.props.scale - (this.props.height)) + "px";
-        // console.log("player.pos.x",player.pos.x,"this.props.scale",this.props.scale,"this.props.width",this.props.width, "/ 4",this.props.width / 4);
+        const center = player.pos.plus(player.size.times(0.5)).times(this.props.scale);
+        const left = (center.x - (this.props.width)) + "px";
+        const top = (center.y - (this.props.height)) + "px";
 
         return (
           <div

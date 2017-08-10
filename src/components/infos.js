@@ -24,7 +24,7 @@ const Infos = (props) => {
           <label>Weapon</label>{weapon}
         </div>
         <div className="switch-cover">
-          <button onClick={props.switchCover}>Light {lightOnOff}</button>
+          <button onClick={props.switchCover}>Turn the light {lightOnOff}</button>
         </div>
       </div>
     );

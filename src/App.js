@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { _ } from 'lodash';
 import './App.css';
 import Infos from './components/infos';
 import Board from './components/board';
@@ -175,6 +174,7 @@ class App extends Component {
     this.endStage = this.endStage.bind(this);
     this.stageIsOver = this.stageIsOver.bind(this);
     this.switchCover = this.switchCover.bind(this);
+    this.isEndPlace = this.isEndPlace.bind(this);
   }
 
   componentDidMount() {
@@ -263,7 +263,16 @@ class App extends Component {
 
   stageIsOver() {
     console.log("Stage is over");
-    this.setState({ gameStatus: "over", stage: this.state.stage++ });
+    const player = this.state.actors.find( actor => actor.type === "player");
+    let theActors = this.randomActors(this.state.stage + 1, this.state.grid);
+    let newPlayerIndex = theActors.findIndex( actor => actor.type === "player");
+    let newPlayer = theActors[newPlayerIndex];
+    const newX = newPlayer.pos.x;
+    const newY = newPlayer.pos.y;
+    newPlayer = Object.assign(newPlayer, player);
+    newPlayer.pos = new Vector(newX, newY);
+    theActors.splice(newPlayerIndex, 1, newPlayer);
+    this.setState({ stage: this.state.stage + 1, actors: theActors });
   }
 
   fight(actor, targetIndex, player, playerIndex, newPlayer, newActors, boss = false) {
@@ -312,23 +321,6 @@ class App extends Component {
     this.setState({ gameStatus : "over" });
   }
 
-  isEmpty(vector) {
-    if (!this.isSpace(vector)) {
-      return false;
-    } else {
-      return this.isUnoccupied(vector);
-    }
-  }
-
-  isSpace(vector, grid = this.state.grid) {
-    return grid[vector.y][vector.x] !== "wall";
-  }
-
-  isUnoccupied(vector) {
-    const occupied = this.state.actors.findIndex( actor => actor.pos.x === vector.x && actor.pos.y === vector.y );
-    return occupied > -1 ? occupied : true;
-  }
-
   buildLevel(plan) {
     const width = plan[0].length;
     const height = plan.length;
@@ -360,26 +352,66 @@ class App extends Component {
       if (dungeons[stage].hasOwnProperty(prop)) {
         for (let p = 0 ; p < dungeons[stage][prop].amount ; p++) {
           const Actor = dungeons[stage][prop].build;
-          newActors.push(new Actor(this.findEmptyCell(grid, newActors), stage));
+          const end = Actor === End;
+          newActors.push(new Actor(this.findEmptyCell(grid, newActors, end), stage));
         }
       }
     }
     return newActors;
   }
 
-  findEmptyCell(grid, actors) {
+  findEmptyCell(grid, actors, end = false) {
+    console.log("end:",end);
     const width = grid[0].length;
     const height = grid.length;
     const findXY = () => {
       let testX = Math.floor(Math.random() * width);
       let testY = Math.floor(Math.random() * height);
-      if (this.isSpace(new Vector(testX,testY), grid) && this.isUnoccupied(new Vector(testX,testY), actors)) {
+      if (end) {
+        console.log("find an end");
+        if (this.isEndPlace(new Vector(testX,testY), grid) && this.isUnoccupied(new Vector(testX,testY), actors)) {
+          return new Vector(testX,testY);
+        } else {
+          return findXY();
+        }
+      } else if (this.isSpace(new Vector(testX,testY), grid) && this.isUnoccupied(new Vector(testX,testY), actors)) {
         return new Vector(testX, testY);
       } else {
         return findXY();
       }
     };
     return findXY();
+  }
+
+  isEmpty(vector) {
+    if (!this.isSpace(vector)) {
+      return false;
+    } else {
+      return this.isUnoccupied(vector);
+    }
+  }
+
+  isSpace(vector, grid = this.state.grid) {
+    return grid[vector.y][vector.x] !== "wall";
+  }
+
+  isUnoccupied(vector) {
+    const occupied = this.state.actors.findIndex( actor => actor.pos.x === vector.x && actor.pos.y === vector.y );
+    return occupied > -1 ? occupied : true;
+  }
+
+
+  isEndPlace(vector, grid = this.state.grid) {
+    for (let i = vector.y - 1 ; i <= vector.y + 1 ; i++) {
+      if ( i >= 0 && i <= grid.length) {
+        for (let j = vector.x - 1; j <= vector.x + 1; j++) {
+          if (j >= 0 && j <= grid[0].length) {
+            if (grid[i][j] === "wall") return false;
+          }
+        }
+      }
+    }
+    return true;
   }
 
   switchCover() {

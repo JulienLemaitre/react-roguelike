@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { _ } from 'lodash';
 import './App.css';
 import Infos from './components/infos';
 import Board from './components/board';
@@ -90,6 +91,8 @@ const dungeons = {
   }
 };
 
+const levels = [30,50,70,90,110];
+
 function Vector(x, y) {
   this.x = x;
   this.y = y;
@@ -102,7 +105,6 @@ Vector.prototype.times = function(factor) {
 };
 
 function Player(pos) {
-  // this.pos = pos.plus(new Vector(0, -0.5));
   this.pos = pos;
   this.size = new Vector(1,1);
   this.health = 100;
@@ -116,7 +118,7 @@ function Enemy(pos, stage) {
   this.pos = pos;
   this.size = new Vector(1, 1);
   this.health = 30;
-  this.power = 5 + stage;
+  this.power = 10 + stage;
 }
 Enemy.prototype.type = "enemy";
 
@@ -216,8 +218,9 @@ class App extends Component {
   interactWith(targetIndex, player, playerIndex) {
     const actor = this.state.actors[targetIndex];
     const type = actor.type;
-    let newPlayer = player;
-    let newActors = this.state.actors;
+    let newPlayer = new Player(new Vector(0,0));
+    newPlayer = Object.assign(newPlayer, player);
+    let newActors = [ ...this.state.actors ];
     switch (type) {
       case "healthItem":
         const health = actor.health;
@@ -260,18 +263,26 @@ class App extends Component {
 
   stageIsOver() {
     console.log("Stage is over");
-    this.setState({ gameStatus: "over" });
+    this.setState({ gameStatus: "over", stage: this.state.stage++ });
   }
 
   fight(actor, targetIndex, player, playerIndex, newPlayer, newActors, boss = false) {
-    const enemyPower = actor.power;
+    const enemyPower = Math.round(actor.power * ( 0.7 + Math.random() * 0.6));
     let enemyHealth = actor.health;
     // We punch the enemy
-    enemyHealth -= player.weapon;
+    const playerPower = Math.round(player.weapon * ( 0.7 + Math.random() * 0.6));
+    enemyHealth -= playerPower;
     if (enemyHealth <= 0) { // If enemy die
       // player gain XP
-      newPlayer.xp += 10 * (player.level + 1);
-      console.log("Enemy died - XP:",player.xp,"->",newPlayer.xp,"( +",10 * (player.level + 1),")");
+      const newXP = player.xp + 10 * (player.level + 1);
+      if (newXP < levels[player.level]) {
+        newPlayer.xp = newXP;
+      } else {
+        newPlayer.level = player.level + 1;
+        newPlayer.xp = newXP - levels[player.level];
+      }
+
+      console.log("Enemy died - XP:",player.xp,"->",newPlayer.xp,"level:",player.level,"->",newPlayer.level);
       newActors.splice(playerIndex, 1, newPlayer);
       // enemy is removed
       newActors.splice(targetIndex, 1);
@@ -280,9 +291,9 @@ class App extends Component {
         this.setState({ actors: newActors, gameStatus : "over" });
       }
     } else { // if not
-      console.log("You wounded the enemy - health:",actor.health,"->",enemyHealth,"( -",player.weapon,")");
+      console.log("You wounded the enemy - health:",actor.health,"->",enemyHealth,"( -",playerPower,")");
       //enemy strike back
-      newPlayer.health -= enemyPower;
+      newPlayer.health = player.health - enemyPower;
       console.log("Enemy wound you - health:",player.health,"->",newPlayer.health,"( -",enemyPower,")");
       if (newPlayer.health <= 0) { // if player die
         this.gameOver();

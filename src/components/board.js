@@ -6,7 +6,7 @@ class Board extends Component {
   constructor(props) {
     super(props);
 
-    this.state={};
+    this.state = {};
 
     this.scrollPlayerIntoView = this.scrollPlayerIntoView.bind(this);
   }
@@ -46,7 +46,7 @@ class Board extends Component {
     return { scrollLeft, scrollTop };
   }
 
-  componentDidUpdate(props) {
+  componentDidUpdate() {
     const scrollMove = this.scrollPlayerIntoView();
     if (this.divGame) {
       if (scrollMove.scrollLeft)
@@ -76,8 +76,8 @@ class Board extends Component {
     const drawCover = () => {
       const player = this.props.actors.find(actor => actor.type === "player");
       if (this.props.displayCover && player) {
-        const radius = 8 * this.props.scale;
-        const backgroundImage = `radial-gradient(circle ${radius}px at center, rgba(0,0,0,0) 0%, rgba(0,0,0,0.1) 30%, rgba(0,0,0,0.2) 40%,rgba(0,0,0,256) 100%)`;
+        const radius = 6 * this.props.scale;
+        const backgroundImage = `radial-gradient(circle ${radius}px at center, rgba(34,34,34,0) 0%, rgba(34,34,34,0.1) 30%, rgba(34,34,34,0.2) 40%,rgba(34,34,34,256) 100%)`;
         const width = (this.props.width * 2) + "px";
         const height = (this.props.height * 2) + "px";
         const center = player.pos.plus(player.size.times(0.5)).times(this.props.scale);

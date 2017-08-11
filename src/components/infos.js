@@ -1,6 +1,6 @@
 import React from 'react';
+import { weapons } from '../game_parameters';
 
-const weapons = ["Wood stick", "hammer", "cudgel", "axe", "sword", "dragon glass sword"];
 const Infos = (props) => {
   if (props.player) {
     const {health, xp, level, weapon} = props.player;

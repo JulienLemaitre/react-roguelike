@@ -1,156 +1,30 @@
 import React, { Component } from 'react';
 import './App.css';
 import Infos from './components/infos';
+import Message from './components/message';
 import Board from './components/board';
+import { LevelPlan, dungeons, levels, weapons, Vector, Player } from './game_parameters';
 
 // TODO build different levelPlan for the different stages
-// TODO Messages and timing for end of a stage, Game Over and Win
 
-const LevelPlan = [
-  "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-  "x      xxxxxxx          xxxxxxxxxxxxxxxxxx        xxxxxxxxxx",
-  "x      xxxxxxx          xxxxxxxxxxxxxxxxxx        xxxxxxxxxx",
-  "x      xxxxxxx xxxxxxxx xxxxxxxxxxxxxxxxxx        xxxxxxxxxx",
-  "x              xxxx                     xx        xxx      x",
-  "xxxxxxx        xxxx                     xx        xxx      x",
-  "xxxxxxx        xxxx                     xx        xxx      x",
-  "xxxxxxx        xxxx                               xxx      x",
-  "xxxxxxx        xxxx                     xx        xxx      x",
-  "xxxxxxx        xxxx                     xx        xxxxxxxx x",
-  "xxxxxxxxxxxxxxxxxxx                     xx                 x",
-  "xx                x                     xxxxxxx xxx        x",
-  "xx                x                     xxxx      x        x",
-  "xx                xxxxxxxx xxxxxxxxxxxxxxxxx      x        x",
-  "xx                xxxx          xxxxxxxxxxxx      x        x",
-  "xx                xxxx          xxxxxxxxxxxx               x",
-  "xxxxxxxxxx xxxxxxxxxxx                     x      xxxxxxxx x",
-  "xxxxxxxxx            xxx xxxxxxxxx         x      xxx      x",
-  "xxxxxxxxx                  xxxxxxx                xxx      x",
-  "xxxxxxxxx                  xxxxxxxxxxxxxxxxxxxxxxxxxx      x",
-  "xxxxxxxxx                  xxxxxxxxxxxxxxxxxxxxxxxxxx      x",
-  "xxxxxxxxx                  x      xxxxxxxxxxxxxxxxxxx      x",
-  "x       x                  x      xxxxxxxxxxxxxxxxxxxxx xxxx",
-  "x       x                  x      xxxxxxx                 xx",
-  "x                                 xxxxxxx                 xx",
-  "x       xxxxxxxxxxxxxxxxxxxx      xxxxxxx                 xx",
-  "x                 xxxxxxxxxx      xxxxxxxxx xxxxxxxxxxxxxxxx",
-  "x                 xxxxxxxxxxxxxxxxxxxxxxxx         xxxxxxxxx",
-  "x                 xxxxxxxxxxxxxxxxxxxxxxxx         xxxxxxxxx",
-  "xxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxx",
-  "x      xxxxxxx          xxxxxxxxxxxxxxxxxx        xxxxxxxxxx",
-  "x      xxxxxxx          xxxxxxxxxxxxxxxxxx        xxxxxxxxxx",
-  "x      xxxxxxx xxxxxxxx xxxxxxxxxxxxxxxxxx        xxxxxxxxxx",
-  "x              xxxx                     xx        xxx      x",
-  "xxxxxxx        xxxx                     xx        xxx      x",
-  "xxxxxxx        xxxx                     xx        xxx      x",
-  "xxxxxxx        xxxx                               xxx      x",
-  "xxxxxxx        xxxx                     xx        xxx      x",
-  "xxxxxxx        xxxx                     xx        xxxxxxxx x",
-  "xxxxxxxxxxxxxxxxxxx                     xx                 x",
-  "xx                                      xxxxxxx xxx        x",
-  "xx                x                     xxxx      x        x",
-  "xx                xxxxxxxx xxxxxxxxxxxxxxxxx      x        x",
-  "xx                xxxx          xxxxxxxxxxxx      x        x",
-  "xx                xxxx          xxxxxxxxxxxx               x",
-  "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",];
-
-const dungeons = {
-  0: {
-    boss: { build: Boss, amount: 1 }, // for testing only :-) !
-    enemy: { build: Enemy, amount: 4 },
-    healthItem: { build: HealthItem, amount: 2 },
-    player: { build: Player, amount: 1},
-    weapon: { build: Weapon, amount: 1},
-    end: { build: End, amount: 1}
-  },
-  1: {
-    enemy: { build: Enemy, amount: 5 },
-    healthItem: { build: HealthItem, amount: 3 },
-    player: { build: Player, amount: 1},
-    weapon: { build: Weapon, amount: 1},
-    end: { build: End, amount: 1}
-  },
-  2: {
-    enemy: { build: Enemy, amount: 6 },
-    healthItem: { build: HealthItem, amount: 4 },
-    player: { build: Player, amount: 1},
-    weapon: { build: Weapon, amount: 1},
-    end: { build: End, amount: 1}
-  },
-  3: {
-    enemy: { build: Enemy, amount: 7 },
-    healthItem: { build: HealthItem, amount: 5 },
-    player: { build: Player, amount: 1},
-    weapon: { build: Weapon, amount: 1},
-    end: { build: End, amount: 1}
-  },
-  4: {
-    enemy: { build: Enemy, amount: 8 },
-    healthItem: { build: HealthItem, amount: 6 },
-    boss: { build: Boss, amount: 1 },
-    player: { build: Player, amount: 1},
-    weapon: { build: Weapon, amount: 1},
-  }
+const INITIAL_STATE = {
+  width: 800,
+  height: 600,
+  scale: 20,
+  grid: [],
+  stage: 0,
+  actors: [],
+  message: "",
+  gameStatus: null,
+  finishDelay: 0,
+  displayCover: true
 };
-
-const levels = [30,130,300,550,900,1500,2500];
-
-function Vector(x, y) {
-  this.x = x;
-  this.y = y;
-}
-Vector.prototype.plus = function(other) {
-  return new Vector(this.x + other.x, this.y + other.y);
+const MESSAGES = {
+  notFinished: "You must kill all the enemies before getting out.",
+  nextStage: "Stage Clear ! Prepare for the next one...",
+  gameOver: "GAME OVER! Game will restart...",
+  win: "You win! Game will restart..."
 };
-Vector.prototype.times = function(factor) {
-  return new Vector(this.x * factor, this.y * factor);
-};
-
-function Player(pos) {
-  this.pos = pos;
-  this.size = new Vector(1,1);
-  this.health = 100;
-  this.xp = 0;
-  this.level = 0;
-  this.weapon = 5;
-}
-Player.prototype.type = "player";
-
-function Enemy(pos, stage) {
-  this.pos = pos;
-  this.size = new Vector(1, 1);
-  this.health = 30;
-  this.power = 10 + stage;
-}
-Enemy.prototype.type = "enemy";
-
-function Boss(pos) {
-  this.pos = pos;
-  this.size = new Vector(2, 2);
-  this.health = 150;
-  this.power = 40;
-}
-Boss.prototype.type = "boss";
-
-function HealthItem(pos) {
-  this.pos = pos;
-  this.size = new Vector(1, 1);
-  this.health = 20;
-}
-HealthItem.prototype.type = "healthItem";
-
-function Weapon(pos) {
-  this.pos = pos;
-  this.size = new Vector(1, 1);
-  this.power = 10;
-}
-Weapon.prototype.type = "weapon";
-
-function End(pos) {
-  this.pos = pos;
-  this.size = new Vector(1, 1);
-}
-End.prototype.type = "end";
 
 class App extends Component {
   constructor(props) {
@@ -163,11 +37,13 @@ class App extends Component {
       grid: [],
       stage: 0,
       actors: [],
+      message: "",
       gameStatus: null,
-      finishDelay: null,
+      finishDelay: 0,
       displayCover: true
     };
 
+    this.newGame = this.newGame.bind(this);
     this.buildLevel = this.buildLevel.bind(this);
     this.randomActors = this.randomActors.bind(this);
     this.findEmptyCell = this.findEmptyCell.bind(this);
@@ -175,21 +51,60 @@ class App extends Component {
     this.interactWith = this.interactWith.bind(this);
     this.gameOver = this.gameOver.bind(this);
     this.endStage = this.endStage.bind(this);
-    this.stageIsOver = this.stageIsOver.bind(this);
+    this.nextstage = this.nextstage.bind(this);
     this.switchCover = this.switchCover.bind(this);
     this.isEndPlace = this.isEndPlace.bind(this);
+    this.youWin = this.youWin.bind(this);
   }
 
   componentDidMount() {
+    document.addEventListener("keydown", this.onKeyDown);
+    this.newGame();
+  }
+
+  componentDidUpdate() {
+    switch (this.state.gameStatus) {
+      case "nextStage":
+        if (this.state.finishDelay > 0) {
+          if (this.timeOutID)
+            window.clearTimeout(this.timeoutID);
+          this.timeoutID = window.setTimeout(() => this.setState({ finishDelay: this.state.finishDelay - 1, message: `${MESSAGES.nextStage} in ${this.state.finishDelay - 1}s` }), 1000);
+        } else {
+          this.nextstage();
+        }
+        break;
+      case "gameOver":
+        if (this.state.finishDelay > 0) {
+          if (this.timeOutID)
+            window.clearTimeout(this.timeoutID);
+          this.timeoutID = window.setTimeout(() => this.setState({ finishDelay: this.state.finishDelay - 1, message: `${MESSAGES.gameOver} in ${this.state.finishDelay - 1}s` }), 1000);
+        } else {
+          this.newGame();
+        }
+        break;
+      case "win":
+        if (this.state.finishDelay > 0) {
+          if (this.timeOutID)
+            window.clearTimeout(this.timeoutID);
+          this.timeoutID = window.setTimeout(() => this.setState({ finishDelay: this.state.finishDelay - 1, message: `${MESSAGES.win} in ${this.state.finishDelay - 1}s` }), 1000);
+        } else {
+          this.newGame();
+        }
+        break;
+      default:
+        break;
+    }
+  }
+
+  newGame() {
     let theGrid = this.buildLevel(LevelPlan);
     let theActors = this.randomActors(this.state.stage, theGrid);
-    document.addEventListener("keydown", this.onKeyDown);
-    this.setState({ grid: theGrid, actors: theActors });
+    this.setState({ ...INITIAL_STATE, grid: theGrid, actors: theActors });
   }
 
   onKeyDown(event) {
-    if (this.state.gameStatus === "over") {
-      console.log("You can't play, Game is OVER!");
+    if (this.state.gameStatus && this.state.gameStatus.length > 0) {
+      // console.log("You can't play, Game is OVER!");
     } else {
       if (event.keyCode === 38)
         this.aimAt(new Vector(0, -1));
@@ -233,7 +148,7 @@ class App extends Component {
         newPlayer.pos = actor.pos;
         newActors.splice(playerIndex, 1, newPlayer);
         newActors.splice(targetIndex, 1);
-        this.setState({ actors: newActors });
+        this.setState({ message: `Health + ${health}`, actors: newActors });
         break;
       case "weapon":
         const weapon = actor.power;
@@ -241,7 +156,7 @@ class App extends Component {
         newPlayer.pos = actor.pos;
         newActors.splice(playerIndex, 1, newPlayer);
         newActors.splice(targetIndex, 1);
-        this.setState({ actors: newActors });
+        this.setState({ message: `You got a new Weapon: ${weapons[Math.floor(newPlayer.weapon / 10)]}`, actors: newActors });
         break;
       case "enemy":
         this.fight(actor, targetIndex, player, playerIndex, newPlayer, newActors);
@@ -260,14 +175,13 @@ class App extends Component {
   endStage() {
     const enemiesLeft = this.state.actors.filter( actor => actor.type === "enemy" || actor.type === "boss");
     if (enemiesLeft && enemiesLeft.length > 0) {
-      console.log("You didn't kill all the enemies of this stage yet.");
+      this.setState({ message: MESSAGES.notFinished })
     } else {
-      this.stageIsOver();
+      this.setState({ message: `${MESSAGES.nextStage} in 3s`, gameStatus: "nextStage", finishDelay: 3 });
     }
   }
 
-  stageIsOver() {
-    console.log("Stage is over");
+  nextstage() {
     const player = this.state.actors.find( actor => actor.type === "player");
     let theActors = this.randomActors(this.state.stage + 1, this.state.grid);
     let newPlayerIndex = theActors.findIndex( actor => actor.type === "player");
@@ -282,7 +196,7 @@ class App extends Component {
         actor.health = actor.health + (this.state.stage + 1) * 10;
       return actor;
     });
-    this.setState({ stage: this.state.stage + 1, actors: theActors });
+    this.setState({ message: "", stage: this.state.stage + 1, actors: theActors, gameStatus: null });
   }
 
   fight(actor, targetIndex, player, playerIndex, newPlayer, newActors, boss = false) {
@@ -291,6 +205,7 @@ class App extends Component {
     // We punch the enemy
     const playerPower = Math.round((player.weapon + player.level * 3) * ( 0.7 + Math.random() * 0.6));
     enemyHealth -= playerPower;
+    let message = "";
     if (enemyHealth <= 0) { // If enemy die
       // player gain XP
       const newXP = player.xp + 10 * (this.state.stage + 1);
@@ -300,22 +215,25 @@ class App extends Component {
         newPlayer.level = player.level + 1;
         newPlayer.xp = newXP - levels[player.level];
       }
-
-      console.log("Enemy died - XP:",player.xp,"->",newPlayer.xp,"level:",player.level,"->",newPlayer.level);
+      // console.log("Enemy died - XP:",player.xp,"->",newPlayer.xp,"level:",player.level,"->",newPlayer.level);
+      message += `Enemy died! You have + ${newXP - player.xp} XP`;
       newActors.splice(playerIndex, 1, newPlayer);
       // enemy is removed
       newActors.splice(targetIndex, 1);
       if (boss) {
-        console.log("You WIN!");
-        this.setState({ actors: newActors, gameStatus : "over" });
+        this.youWin(newActors);
+        return;
       }
     } else { // if not
-      console.log("You wounded the enemy - health:",actor.health,"->",enemyHealth,"( -",playerPower,")");
+      // console.log("You wounded the enemy - health:",actor.health,"->",enemyHealth,"( -",playerPower,")");
+      message += `Enemy's casualty: -${playerPower} (${enemyHealth} left)`;
       //enemy strike back
       newPlayer.health = player.health - enemyPower;
-      console.log("Enemy wound you - health:",player.health,"->",newPlayer.health,"( -",enemyPower,")");
+      // console.log("Enemy wound you - health:",player.health,"->",newPlayer.health,"( -",enemyPower,")");
+      message += `  /  You've been hit: -${enemyPower}`;
       if (newPlayer.health <= 0) { // if player die
         this.gameOver();
+        return;
       } else {
         let newEnemy = actor;
         newEnemy.health = enemyHealth;
@@ -323,12 +241,15 @@ class App extends Component {
         newActors.splice(targetIndex, 1, newEnemy);
       }
     }
-    this.setState({ actors: newActors });
+    this.setState({ actors: newActors, message: message });
+  }
+
+  youWin(newActors) {
+    this.setState({ message: `${MESSAGES.win} in 10s`, actors: newActors, gameStatus : "win", finishDelay: 10 });
   }
 
   gameOver() {
-    console.log("GAME OVER");
-    this.setState({ gameStatus : "over" });
+    this.setState({ message: `${MESSAGES.gameOver} in 5s`, gameStatus : "gameOver", finishDelay: 5});
   }
 
   buildLevel(plan) {
@@ -388,17 +309,6 @@ class App extends Component {
             return findXY();
           }
       }
-      // if (actorType === "end") {
-      //   if (this.isEndPlace(new Vector(testX,testY), grid) && this.isUnoccupied(new Vector(testX,testY), actors)) {
-      //     return new Vector(testX,testY);
-      //   } else {
-      //     return findXY();
-      //   }
-      // } else if (this.isSpace(new Vector(testX,testY), grid) && this.isUnoccupied(new Vector(testX,testY), actors)) {
-      //   return new Vector(testX, testY);
-      // } else {
-      //   return findXY();
-      // }
     };
     return findXY();
   }
@@ -413,13 +323,11 @@ class App extends Component {
 
   isSpace(vector, grid = this.state.grid, actorSize) {
     actorSize = actorSize || new Vector(1,1);
-    // console.log("isSpace",actorSize);
     if (actorSize.x === 1 && actorSize.y === 1)
       return grid[vector.y][vector.x] !== "wall";
     else {
       for ( let aX = vector.x ; aX <= vector.x + actorSize.x - 1 ; aX++ ) {
         for ( let aY = vector.y ; aY <= vector.y + actorSize.y - 1 ; aY++ ) {
-          console.log(aY, aX, grid[aY][aX]);
           if (grid[aY][aX] === "wall")
             return false;
         }
@@ -430,13 +338,11 @@ class App extends Component {
 
   isUnoccupied(vector, actors = this.state.actors) {
     const occupied = actors.findIndex( actor => {
-      console.log(actor.type,"pos:",actor.pos.x,",",actor.pos.y,"size:",actor.size.x,",",actor.size.y);
       if (actor.size.x === 1 && actor.size.y === 1)
         return actor.pos.x === vector.x && actor.pos.y === vector.y;
       else {
         for ( let aX = actor.pos.x ; aX <= actor.pos.x + actor.size.x - 1 ; aX++ ) {
           for ( let aY = actor.pos.y ; aY <= actor.pos.y + actor.size.y - 1 ; aY++ ) {
-            console.log("test occupation of",aX,aY,aX === vector.x && aY === vector.y);
             if (aX === vector.x && aY === vector.y)
               return true;
           }
@@ -478,6 +384,9 @@ class App extends Component {
             switchCover={this.switchCover}
             displayCover={this.state.displayCover}
             levels={levels}
+          />
+          <Message
+            message={this.state.message}
           />
         </div>
         <div className="App-body">

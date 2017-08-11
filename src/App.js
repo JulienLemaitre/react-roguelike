@@ -3,9 +3,7 @@ import './App.css';
 import Infos from './components/infos';
 import Message from './components/message';
 import Board from './components/board';
-import { LevelPlan, dungeons, levels, weapons, Vector, Player } from './game_parameters';
-
-// TODO build different levelPlan for the different stages
+import { LevelPlans, dungeons, levels, weapons, Vector, Player } from './game_parameters';
 
 const INITIAL_STATE = {
   width: 800,
@@ -97,14 +95,13 @@ class App extends Component {
   }
 
   newGame() {
-    let theGrid = this.buildLevel(LevelPlan);
+    let theGrid = this.buildLevel(LevelPlans[this.state.stage]);
     let theActors = this.randomActors(this.state.stage, theGrid);
     this.setState({ ...INITIAL_STATE, grid: theGrid, actors: theActors });
   }
 
   onKeyDown(event) {
     if (this.state.gameStatus && this.state.gameStatus.length > 0) {
-      // console.log("You can't play, Game is OVER!");
     } else {
       if (event.keyCode === 38)
         this.aimAt(new Vector(0, -1));
@@ -183,7 +180,8 @@ class App extends Component {
 
   nextstage() {
     const player = this.state.actors.find( actor => actor.type === "player");
-    let theActors = this.randomActors(this.state.stage + 1, this.state.grid);
+    const theGrid = this.buildLevel(LevelPlans[this.state.stage + 1]);
+    let theActors = this.randomActors(this.state.stage + 1, theGrid);
     let newPlayerIndex = theActors.findIndex( actor => actor.type === "player");
     let newPlayer = theActors[newPlayerIndex];
     const newX = newPlayer.pos.x;
@@ -196,7 +194,7 @@ class App extends Component {
         actor.health = actor.health + (this.state.stage + 1) * 10;
       return actor;
     });
-    this.setState({ message: "", stage: this.state.stage + 1, actors: theActors, gameStatus: null });
+    this.setState({ message: "", stage: this.state.stage + 1, grid: theGrid, actors: theActors, gameStatus: null });
   }
 
   fight(actor, targetIndex, player, playerIndex, newPlayer, newActors, boss = false) {
@@ -215,7 +213,6 @@ class App extends Component {
         newPlayer.level = player.level + 1;
         newPlayer.xp = newXP - levels[player.level];
       }
-      // console.log("Enemy died - XP:",player.xp,"->",newPlayer.xp,"level:",player.level,"->",newPlayer.level);
       message += `Enemy died! You have + ${newXP - player.xp} XP`;
       newActors.splice(playerIndex, 1, newPlayer);
       // enemy is removed
@@ -225,11 +222,9 @@ class App extends Component {
         return;
       }
     } else { // if not
-      // console.log("You wounded the enemy - health:",actor.health,"->",enemyHealth,"( -",playerPower,")");
       message += `Enemy's casualty: -${playerPower} (${enemyHealth} left)`;
       //enemy strike back
       newPlayer.health = player.health - enemyPower;
-      // console.log("Enemy wound you - health:",player.health,"->",newPlayer.health,"( -",enemyPower,")");
       message += `  /  You've been hit: -${enemyPower}`;
       if (newPlayer.health <= 0) { // if player die
         this.gameOver();
@@ -249,7 +244,7 @@ class App extends Component {
   }
 
   gameOver() {
-    this.setState({ message: `${MESSAGES.gameOver} in 5s`, gameStatus : "gameOver", finishDelay: 5});
+    this.setState({ message: `${MESSAGES.gameOver} in 5s`, gameStatus : "gameOver", finishDelay: 5, stage: 0});
   }
 
   buildLevel(plan) {
@@ -291,7 +286,6 @@ class App extends Component {
     const width = grid[0].length;
     const height = grid.length;
     let actorSize = actorType === "boss" ? new Vector(2,2) : undefined ;
-    // console.log(actorType, actorSize);
     const findXY = () => {
       let testX = Math.floor(Math.random() * width);
       let testY = Math.floor(Math.random() * height);

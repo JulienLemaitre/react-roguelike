@@ -56,6 +56,7 @@ const LevelPlan = [
 
 const dungeons = {
   0: {
+    boss: { build: Boss, amount: 1 }, // for testing only :-) !
     enemy: { build: Enemy, amount: 4 },
     healthItem: { build: HealthItem, amount: 2 },
     player: { build: Player, amount: 1},
@@ -198,6 +199,8 @@ class App extends Component {
         this.aimAt(new Vector(-1, 0));
       if (event.keyCode === 39)
         this.aimAt(new Vector(1, 0));
+      if (event.keyCode === 76)
+        this.switchCover();
     }
   }
 
@@ -349,42 +352,53 @@ class App extends Component {
 
   }
 
-// TODO make the Boss occupy 4 square of AVAILABLE SPACE
-// TODO handle colision with any of the square occupied by the boss
-
   randomActors(stage, grid) {
     let newActors = [];
     for (let prop in dungeons[stage]) {
       if (dungeons[stage].hasOwnProperty(prop)) {
         for (let p = 0 ; p < dungeons[stage][prop].amount ; p++) {
           const Actor = dungeons[stage][prop].build;
-          const end = Actor === End;
-          newActors.push(new Actor(this.findEmptyCell(grid, newActors, end), stage));
+          const actorType = Actor.prototype.type;
+          newActors.push(new Actor(this.findEmptyCell(grid, newActors, actorType), stage));
         }
       }
     }
     return newActors;
   }
 
-  findEmptyCell(grid, actors, end = false) {
-    console.log("end:",end);
+  findEmptyCell(grid, actors, actorType) {
     const width = grid[0].length;
     const height = grid.length;
+    let actorSize = actorType === "boss" ? new Vector(2,2) : undefined ;
+    // console.log(actorType, actorSize);
     const findXY = () => {
       let testX = Math.floor(Math.random() * width);
       let testY = Math.floor(Math.random() * height);
-      if (end) {
-        console.log("find an end");
-        if (this.isEndPlace(new Vector(testX,testY), grid) && this.isUnoccupied(new Vector(testX,testY), actors)) {
-          return new Vector(testX,testY);
-        } else {
-          return findXY();
-        }
-      } else if (this.isSpace(new Vector(testX,testY), grid) && this.isUnoccupied(new Vector(testX,testY), actors)) {
-        return new Vector(testX, testY);
-      } else {
-        return findXY();
+      switch (actorType) {
+        case "end":
+          if (this.isEndPlace(new Vector(testX,testY), grid) && this.isUnoccupied(new Vector(testX,testY), actors)) {
+            return new Vector(testX,testY);
+          } else {
+            return findXY();
+          }
+        default:
+          if (this.isSpace(new Vector(testX,testY), grid, actorSize) && this.isUnoccupied(new Vector(testX,testY), actors)) {
+            return new Vector(testX, testY);
+          } else {
+            return findXY();
+          }
       }
+      // if (actorType === "end") {
+      //   if (this.isEndPlace(new Vector(testX,testY), grid) && this.isUnoccupied(new Vector(testX,testY), actors)) {
+      //     return new Vector(testX,testY);
+      //   } else {
+      //     return findXY();
+      //   }
+      // } else if (this.isSpace(new Vector(testX,testY), grid) && this.isUnoccupied(new Vector(testX,testY), actors)) {
+      //   return new Vector(testX, testY);
+      // } else {
+      //   return findXY();
+      // }
     };
     return findXY();
   }
@@ -397,12 +411,39 @@ class App extends Component {
     }
   }
 
-  isSpace(vector, grid = this.state.grid) {
-    return grid[vector.y][vector.x] !== "wall";
+  isSpace(vector, grid = this.state.grid, actorSize) {
+    actorSize = actorSize || new Vector(1,1);
+    // console.log("isSpace",actorSize);
+    if (actorSize.x === 1 && actorSize.y === 1)
+      return grid[vector.y][vector.x] !== "wall";
+    else {
+      for ( let aX = vector.x ; aX <= vector.x + actorSize.x - 1 ; aX++ ) {
+        for ( let aY = vector.y ; aY <= vector.y + actorSize.y - 1 ; aY++ ) {
+          console.log(aY, aX, grid[aY][aX]);
+          if (grid[aY][aX] === "wall")
+            return false;
+        }
+      }
+      return true;
+    }
   }
 
-  isUnoccupied(vector) {
-    const occupied = this.state.actors.findIndex( actor => actor.pos.x === vector.x && actor.pos.y === vector.y );
+  isUnoccupied(vector, actors = this.state.actors) {
+    const occupied = actors.findIndex( actor => {
+      console.log(actor.type,"pos:",actor.pos.x,",",actor.pos.y,"size:",actor.size.x,",",actor.size.y);
+      if (actor.size.x === 1 && actor.size.y === 1)
+        return actor.pos.x === vector.x && actor.pos.y === vector.y;
+      else {
+        for ( let aX = actor.pos.x ; aX <= actor.pos.x + actor.size.x - 1 ; aX++ ) {
+          for ( let aY = actor.pos.y ; aY <= actor.pos.y + actor.size.y - 1 ; aY++ ) {
+            console.log("test occupation of",aX,aY,aX === vector.x && aY === vector.y);
+            if (aX === vector.x && aY === vector.y)
+              return true;
+          }
+        }
+        return false;
+      }
+    });
     return occupied > -1 ? occupied : true;
   }
 

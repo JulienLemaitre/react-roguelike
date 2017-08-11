@@ -25,7 +25,7 @@ const Infos = (props) => {
           <label>Weapon</label>{weapons[Math.floor(weapon / 10)]}
         </div>
         <div className="switch-cover">
-          <button onClick={props.switchCover}>Turn the light {lightOnOff}</button>
+          <button onClick={props.switchCover}>Turn the <span className="key-indicator">l</span>ight {lightOnOff}</button>
         </div>
       </div>
     );

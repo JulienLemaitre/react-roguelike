@@ -3,6 +3,9 @@ import './App.css';
 import Infos from './components/infos';
 import Board from './components/board';
 
+// TODO build different levelPlan for the different stages
+// TODO Messages and timing for end of a stage, Game Over and Win
+
 const LevelPlan = [
   "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
   "x      xxxxxxx          xxxxxxxxxxxxxxxxxx        xxxxxxxxxx",
@@ -348,7 +351,6 @@ class App extends Component {
 
 // TODO make the Boss occupy 4 square of AVAILABLE SPACE
 // TODO handle colision with any of the square occupied by the boss
-// TODO Name the Weapons
 
   randomActors(stage, grid) {
     let newActors = [];

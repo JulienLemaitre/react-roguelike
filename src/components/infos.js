@@ -1,5 +1,6 @@
 import React from 'react';
 
+const weapons = ["Wood stick", "hammer", "cudgel", "axe", "sword", "dragon glass sword"];
 const Infos = (props) => {
   if (props.player) {
     const {health, xp, level, weapon} = props.player;
@@ -21,7 +22,7 @@ const Infos = (props) => {
           <label>Level</label>{level} (next in {nextLevel} XP)
         </div>
         <div className="power">
-          <label>Weapon</label>{weapon}
+          <label>Weapon</label>{weapons[Math.floor(weapon / 10)]}
         </div>
         <div className="switch-cover">
           <button onClick={props.switchCover}>Turn the light {lightOnOff}</button>

@@ -12,6 +12,16 @@ html, body, #root, .App {
 .App-header {
   padding: 20px;
   color: white; }
+  .App-header h1 {
+    margin-bottom: 0; }
+  .App-header p {
+    margin-top: 0.5em;
+    font-size: 1.5em;
+    text-align: center; }
+
+.key-indicator {
+  text-transform: uppercase;
+  text-decoration: underline; }
 
 .infos {
   display: flex;
@@ -82,3 +92,23 @@ html, body, #root, .App {
     background-color: #000; }
   .switch-cover button:focus {
     outline: none; }
+
+.App-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white; }
+  .App-footer .square {
+    height: 15px;
+    width: 15px;
+    margin-right: 15px; }
+    .App-footer .square.boss {
+      height: 30px;
+      width: 30px; }
+  .App-footer .legend {
+    margin-right: 30px;
+    display: flex;
+    align-items: baseline; }
+    .App-footer .legend.boss {
+      align-items: center;
+      background: transparent; }

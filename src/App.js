@@ -470,6 +470,7 @@ class App extends Component {
       <div className="App">
         <div className="App-header">
           <h1>React Roguelike</h1>
+          <p className="game-info">Beat the boss on stage 4 to win !</p>
           <Infos
             stage={this.state.stage}
             player={this.state.actors.find( actor => actor.type === "player")}
@@ -491,6 +492,26 @@ class App extends Component {
             scrollTop={this.state.scrollTop}
             displayCover={this.state.displayCover}
           />
+        </div>
+        <div className="App-footer">
+          <div className="legend">
+            <div className="square player"></div>You
+          </div>
+          <div className="legend">
+            <div className="square enemy"></div>Enemy
+          </div>
+          <div className="legend">
+            <div className="square weapon"></div>Weapon
+          </div>
+          <div className="legend">
+            <div className="square healthItem"></div>Health
+          </div>
+          <div className="legend">
+            <div className="square end"></div>Gate
+          </div>
+          <div className="legend boss">
+            <div className="square boss"></div>Boss
+          </div>
         </div>
       </div>
     );

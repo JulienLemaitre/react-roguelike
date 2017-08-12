@@ -61,6 +61,8 @@ class App extends Component {
   }
 
   componentDidUpdate() {
+
+    // We manage the three case when there is a timer and the game is halted: On stage finished, on Game over, and on winning the game.
     switch (this.state.gameStatus) {
       case "nextStage":
         if (this.state.finishDelay > 0) {
@@ -100,6 +102,7 @@ class App extends Component {
     this.setState({ ...INITIAL_STATE, grid: theGrid, actors: theActors });
   }
 
+  // Handle key presses, if there is no special game status
   onKeyDown(event) {
     if (this.state.gameStatus && this.state.gameStatus.length > 0) {
     } else {
@@ -116,11 +119,13 @@ class App extends Component {
     }
   }
 
+  // Will look at the direction where the player went, and juge what to do
   aimAt(vector) {
     const playerIndex = this.state.actors.findIndex(actor => actor.type === "player");
     const player = this.state.actors[playerIndex];
     const target = this.isEmpty(player.pos.plus(vector));
     if (target === true) {
+      // The place is free, let's go there!
       const newPos = player.pos.plus(vector);
       const newPlayer = player;
       newPlayer.pos = newPos;
@@ -128,15 +133,20 @@ class App extends Component {
       newActors.splice(playerIndex, 1, newPlayer);
       this.setState({ actors: newActors});
     } else if (target !== false && target > -1) {
+      // There is an "actor" here, item or enemy. Let's see what to do whith it...
       this.interactWith(target, player, playerIndex);
     }
   }
 
+  // Juge wat to do depending on the nature of the item or enemy encountered
   interactWith(targetIndex, player, playerIndex) {
     const actor = this.state.actors[targetIndex];
     const type = actor.type;
+
+    // These two lines are important to get a new object for the player, and not mutate the state ;-)
     let newPlayer = new Player(new Vector(0,0));
     newPlayer = Object.assign(newPlayer, player);
+
     let newActors = [ ...this.state.actors ];
     switch (type) {
       case "healthItem":
@@ -170,8 +180,9 @@ class App extends Component {
   }
 
   endStage() {
-    const enemiesLeft = this.state.actors.filter( actor => actor.type === "enemy" || actor.type === "boss");
+    const enemiesLeft = this.state.actors.filter( actor => actor.type === "enemy");
     if (enemiesLeft && enemiesLeft.length > 0) {
+      // If enemies are left on the map, it tells the player to go kill them before leaving
       this.setState({ message: MESSAGES.notFinished })
     } else {
       this.setState({ message: `${MESSAGES.nextStage} in 3s`, gameStatus: "nextStage", finishDelay: 3 });
@@ -181,17 +192,20 @@ class App extends Component {
   nextstage() {
     const player = this.state.actors.find( actor => actor.type === "player");
     const theGrid = this.buildLevel(LevelPlans[this.state.stage + 1]);
+    // Next line build new set of actors, including a new instance of Player
     let theActors = this.randomActors(this.state.stage + 1, theGrid);
     let newPlayerIndex = theActors.findIndex( actor => actor.type === "player");
     let newPlayer = theActors[newPlayerIndex];
     const newX = newPlayer.pos.x;
     const newY = newPlayer.pos.y;
+    // Next line copy the existing properties of the player into the new instance of Player
+    // in order to keep health, weapon, etc, without mutating the state
     newPlayer = Object.assign(newPlayer, player);
     newPlayer.pos = new Vector(newX, newY);
     theActors.splice(newPlayerIndex, 1, newPlayer);
     theActors = theActors.map( actor => {
       if (actor.type === "enemy")
-        actor.health = actor.health + (this.state.stage + 1) * 10;
+        actor.health = actor.health + (this.state.stage + 1) * 10; // Enemies have more health at each stage
       return actor;
     });
     this.setState({ message: "", stage: this.state.stage + 1, grid: theGrid, actors: theActors, gameStatus: null });
@@ -291,6 +305,8 @@ class App extends Component {
       let testY = Math.floor(Math.random() * height);
       switch (actorType) {
         case "end":
+          // for the end place, we need a place with no wall in all cases around,
+          // to be shure it doesn't prevent from reaching a part of the map.
           if (this.isEndPlace(new Vector(testX,testY), grid) && this.isUnoccupied(new Vector(testX,testY), actors)) {
             return new Vector(testX,testY);
           } else {
@@ -320,6 +336,7 @@ class App extends Component {
     if (actorSize.x === 1 && actorSize.y === 1)
       return grid[vector.y][vector.x] !== "wall";
     else {
+      // if the actor is wider than 1 x 1, we test all the cases according to its size
       for ( let aX = vector.x ; aX <= vector.x + actorSize.x - 1 ; aX++ ) {
         for ( let aY = vector.y ; aY <= vector.y + actorSize.y - 1 ; aY++ ) {
           if (grid[aY][aX] === "wall")
@@ -335,6 +352,7 @@ class App extends Component {
       if (actor.size.x === 1 && actor.size.y === 1)
         return actor.pos.x === vector.x && actor.pos.y === vector.y;
       else {
+        // if the actor is wider than 1 x 1, we test all the cases according to its size
         for ( let aX = actor.pos.x ; aX <= actor.pos.x + actor.size.x - 1 ; aX++ ) {
           for ( let aY = actor.pos.y ; aY <= actor.pos.y + actor.size.y - 1 ; aY++ ) {
             if (aX === vector.x && aY === vector.y)

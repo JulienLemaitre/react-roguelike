@@ -8,20 +8,19 @@ class Background extends Component {
   }
 
   shouldComponentUpdate(nextProps) {
+    // We make sure we don't update the board background
+    // until there is a new game to draw or a change of stage,
+    // i.e. the grid provided is not the same than the one at the previous one.
     if (this.props.grid && nextProps.grid && this.props.grid.length > 0 && nextProps.grid.length > 0) {
-      // return (nextProps.grid.length !== this.props.grid.length &&  nextProps.grid[0].length !== this.props.grid[0].length);
-      // console.log("une grille, comparons!");
       let update = false;
       for (let i = 0 ; i < nextProps.grid[0].length ; i++) {
-        // console.log("nextProps.grid[0][i]",nextProps.grid[0][i],"this.props.grid[0][i]",this.props.grid[0][i],nextProps.grid[0][i] === this.props.grid[0][i]);
+        // Compraing the second line is sufficient to differenciate the stages.
         if (nextProps.grid[1][i] !== this.props.grid[1][i])
           update = true
       }
-      // console.log("update ?", update);
       return update;
     }
     else {
-      // console.log("pas de grille, update!");
       return true;
     }
   }

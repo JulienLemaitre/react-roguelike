@@ -11,6 +11,8 @@ class Board extends Component {
     this.scrollPlayerIntoView = this.scrollPlayerIntoView.bind(this);
   }
 
+  // We create scrolling to follow the player
+  // only when we get out of the safe place of the center thirs of width and height
   scrollPlayerIntoView () {
     const theBoard = document.querySelector(".game");
     let scrollLeft = null, scrollTop = null;
@@ -48,6 +50,7 @@ class Board extends Component {
 
   componentDidUpdate() {
     const scrollMove = this.scrollPlayerIntoView();
+    // We update the scroll only if needed
     if (this.divGame) {
       if (scrollMove.scrollLeft)
         this.divGame.scrollLeft = Math.floor(scrollMove.scrollLeft);
@@ -73,6 +76,8 @@ class Board extends Component {
       );
     });
 
+    // This is the black shadow covering the board
+    // and painting a circle of light around the player
     const drawCover = () => {
       const player = this.props.actors.find(actor => actor.type === "player");
       if (this.props.displayCover && player) {
